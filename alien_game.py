@@ -16,13 +16,14 @@ def run_game():
     bullets = Group()  #创建编组用于存储子弹,必须是在主循环外创建,循环内创建会导致游戏卡顿
     aliens = Group()  #编组管理外星人
     play_button = Button(screen,game_settings,'PLAY') #创建button
+    last_time = 0 #创建计时器
     while True: #永远循环
         check_event(game_settings,screen,ship,bullets,aliens,stats,play_button)  #监听输入
         if stats.game_activate == True:
             current_time = pygame.time.get_ticks()  #获取当前经过时间,以毫秒计
-            if current_time > 1000*game_settings.alien_built_speed:  #设置每n秒自动生成一个alien
+            if current_time-last_time > 1000*game_settings.alien_built_speed:  #设置每n秒自动生成一个alien
                 alien_built(game_settings,screen,aliens)
-                pygame.init()  #重置时间
+                last_time = current_time  #把当前时间赋给last_time
         check_ship_alien(game_settings,ship,bullets,aliens,stats)
         ship.update()  #更新位置
         update_bullets(bullets,aliens) #更新子弹

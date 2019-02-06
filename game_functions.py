@@ -54,7 +54,7 @@ def check_event(game_settings,screen,ship,bullets,aliens,stats,play_button):  #�
     for event in pygame.event.get():  # 监视键盘和鼠标操作
         if event.type == pygame.QUIT:  # 捕捉到退出
             sys.exit()  # 调用sys模块退出
-        elif event.type == pygame.KEYDOWN: #捕捉键盘输入
+        elif event.type == pygame.KEYDOWN and stats.game_activate is True: #捕捉键盘输入
             check_keydown(event,game_settings,screen,ship,bullets,aliens)
         elif event.type == pygame.KEYUP: #按键弹起
             check_keyup(event,ship)
