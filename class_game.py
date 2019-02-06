@@ -1,4 +1,5 @@
 import pygame
+import csv
 import random
 from pygame.sprite import Sprite #精灵模块
 
@@ -97,14 +98,14 @@ class Alien(Sprite):
 
 class Button():
     '''创建按钮类'''
-    def __init__(self,screen,game_settings,msg):
+    def __init__(self, screen, game_settings, msg):
         self.screen = screen
         self.settings = game_settings
         self.screen_rect = screen.get_rect()
-        self.rect = pygame.Rect(0,0,game_settings.button_width,
-                                game_settings.button_height) #设置按钮的rect对象
+        self.rect = pygame.Rect(0, 0, game_settings.button_width,
+                                game_settings.button_height)  # 设置按钮的rect对象
         self.rect.centerx = self.screen_rect.centerx
-        self.present_msg(msg)  #不是很明白这个属性的意义,直接调用方法和作为属性有什么区别?
+        self.present_msg(msg)  # 不是很明白这个属性的意义,直接调用方法和作为属性有什么区别?
 
     def present_msg(self,msg):
         '''将msg渲染为图像'''
@@ -121,3 +122,81 @@ class Button():
         '''将button绘制到屏幕上'''
         self.screen.fill(self.settings.button_color,self.rect)  #先绘制按钮
         self.screen.blit(self.msg_image,self.msg_image_rect) #把文字图像传输到文字矩形上
+
+
+class ScoreBoard():
+    '''计分板'''
+    def __init__(self, screen, stats, game_settings):
+        self.screen = screen
+        self.stats = stats
+        self.settings = game_settings
+        self.rect = pygame.Rect(0, 0, self.settings.score_width, self.settings.score_height)
+        self.screen_rect = screen.get_rect()
+        self.rect.left = self.screen_rect.left   # 左上角对齐
+        self.rect.top = self.screen_rect.top
+        self.present_msg()   # 在这里调用方法,大概是会返回self.msg_image和rect两个属性吧
+
+    def present_msg(self):
+        msg = str(self.stats.score)
+        self.msg_image = self.settings.score_font.render(msg, True,   # 文字,反锯齿
+                                                         self.settings.text_color,  # 文字颜色
+                                                         self.settings.score_color  # 文字背景颜色
+                                                         )
+        self.image_rect = self.msg_image.get_rect()
+        self.image_rect.center = self.rect.center
+
+    def draw(self):
+        self.screen.fill(self.settings.score_color,   # 传递矩形填充颜色
+                         self.rect    # 传递矩形对象
+                         )
+        self.screen.blit(self.msg_image,   # 传递图像
+                         self.image_rect   # 传递矩形对象
+                         )
+
+
+class HighScore():
+    '''最高分'''
+    def __init__(self, screen, game_settings):
+        self.screen = screen
+        self.screen_rect = screen.get_rect()
+        self.settings = game_settings
+        self.rect = pygame.Rect(0, 0, self.settings.button_width, self.settings.button_height)  # 背景板
+        self.rect.centerx = self.screen_rect.centerx  # 屏幕中央
+        self.rect.centery = self.screen_rect.centery
+        self.update()
+        self.pre_msg()
+
+    def update(self):
+        path = 'game_stats.csv'
+        f = open(path, 'a')  # 先创建这样一个文件
+        f.close()  # 关闭文件
+        with open(path, 'r') as f:   # 只读模式打开
+            reader = csv.reader(f)   # 阅读器对象不能直接判断是否为空,而且只有r模式可以读取内容
+            read_list = []
+            for row in reader:  # 读取全部内容到列表
+                read_list.append(row)
+        with open(path, 'a') as f:
+            if not read_list:  # 第一次打开该文件,则列表为空,需要添加字段
+                data = [['high score', ], [0, ], ]  # csv写入必须是列表
+                for row in data:
+                    writer.writerow(row)  # 按行写入
+                self.high_score = 0
+            else:
+                data = []
+                for row in read_list[1:]:  # 切片,首行是字段
+                    try:
+                        data.append(row[0])  # 读取最高分
+                    except IndexError:  # 有可能存在空白
+                        pass
+                self.high_score = max(data)
+
+    def pre_msg(self):
+        msg = 'Highest Score:'+str(self.high_score)
+        self.msg_image = self.settings.high_score_font.render(msg, True, self.settings.text_color)  # 渲染字体图像
+        self.msg_rect = self.msg_image.get_rect()  # 创建字体图像矩形
+        self.msg_rect.center = self.rect.center  # 字体居中
+
+    def draw(self):
+        self.screen.fill(self.settings.button_color, self.rect)
+        self.screen.blit(self.msg_image, self.msg_rect)
+
