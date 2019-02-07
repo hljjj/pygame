@@ -12,8 +12,8 @@ def check_event(game_settings, screen, ship, bullets, aliens, stats, play_button
     for event in pygame.event.get():  # 监视键盘和鼠标操作
         if event.type == pygame.QUIT:  # 捕捉到退出
             sys.exit()  # 调用sys模块退出
-        elif event.type == pygame.KEYDOWN and stats.game_activate is True:  # 捕捉键盘输入
-            check_keydown(event, game_settings, screen, ship, bullets, aliens)
+        elif event.type == pygame.KEYDOWN:  # 捕捉键盘输入
+            check_keydown(event, game_settings, screen, ship, bullets, aliens, stats)
         elif event.type == pygame.KEYUP:  # 按键弹起
             check_keyup(event, ship)
         elif event.type == pygame.MOUSEBUTTONDOWN:  # 捕捉鼠标点击
@@ -64,17 +64,19 @@ def check_ship_alien(game_settings, ship, bullets, aliens, stats, high_score):
             ship_hit(game_settings, ship, bullets, aliens, stats, high_score)
 
 
-def check_keydown(event, game_settings, screen, ship, bullets, aliens):
-    if event.key == pygame.K_RIGHT:  # 读取键入的属性,捕捉到右箭头
-        ship.moving_right = True
-    elif event.key == pygame.K_LEFT:  # 捕捉左键
-        ship.moving_left = True
-    elif event.key == pygame.K_SPACE:  # 捕捉空格键
-        bullet_fire(game_settings, screen, ship, bullets)
-    elif event.key == pygame.K_a:  # 设置一个让外星人生成的条件
-        alien_built(game_settings, screen, aliens)
-    elif event.key == pygame.K_q or pygame.K_ESCAPE:  # 捕捉退出键
-        sys.exit()
+def check_keydown(event, game_settings, screen, ship, bullets, aliens,stats):
+    if stats.game_activate is True:
+        if event.key == pygame.K_RIGHT:  # 读取键入的属性,捕捉到右箭头
+            ship.moving_right = True
+        elif event.key == pygame.K_LEFT:  # 捕捉左键
+            ship.moving_left = True
+        elif event.key == pygame.K_SPACE:  # 捕捉空格键
+            bullet_fire(game_settings, screen, ship, bullets)
+        elif event.key == pygame.K_a:  # 设置一个让外星人生成的条件
+            alien_built(game_settings, screen, aliens)
+    else:
+        if event.key == pygame.K_q or pygame.K_ESCAPE:  # 捕捉退出键
+            sys.exit()
 
 
 def check_keyup(event, ship):
@@ -101,6 +103,7 @@ def check_bullets(bullets, aliens, stats, score_board, game_settings):
                                           True     # 删除发生碰撞的目标
                                           )
     if collides:    # 计分
+        sound_bomb(game_settings)
         for alien in collides.values():
             stats.score += len(alien)*stats.score_point
     score_board.present_msg()  # 更新计分板
@@ -129,3 +132,9 @@ def update_screen(game_settings, screen, ship, actor, bullets, aliens, play_butt
     else:
         score_board.draw()  # 显示计分板
     pygame.display.flip()   # 用新的屏幕取代旧屏幕,需要注意层级
+
+
+def sound_bomb(game_settings):
+    '''播放爆炸音效'''
+    pygame.mixer.music.load(game_settings.collide_sound)
+    pygame.mixer.music.play()

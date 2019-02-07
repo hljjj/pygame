@@ -20,16 +20,16 @@ class Ship():
         self.x = float(self.rect.centerx)
 
     def update(self):
-        if self.moving_right == True and self.rect.right < self.screen_rect.right: #右边未触底
+        if self.moving_right is True and self.rect.right < self.screen_rect.right:  #  右边未触底
             self.x += self.speed
             self.rect.centerx = self.x
-        elif self.moving_left == True and self.rect.left > self.screen_rect.left: #左边未触底,需要注意pygame的坐标规则
+        elif self.moving_left is True and self.rect.left > self.screen_rect.left:  # 左边未触底,需要注意pygame的坐标规则
             self.x -= self.speed
             self.rect.centerx = self.x
 
-    def blitme(self):  #blit是块传送
+    def blitme(self):  # blit是块传送
         '''在指定位置绘制飞船'''
-        self.screen.blit(self.image,self.rect)
+        self.screen.blit(self.image, self.rect)
 
 class Actor():
     '''传一张头像作为游戏角色'''
@@ -137,7 +137,7 @@ class ScoreBoard():
         self.present_msg()   # 在这里调用方法,大概是会返回self.msg_image和rect两个属性吧
 
     def present_msg(self):
-        msg = str(self.stats.score)
+        msg = 'score:'+str(self.stats.score)+'   '+'ship:'+str(self.settings.ship_limit)
         self.msg_image = self.settings.score_font.render(msg, True,   # 文字,反锯齿
                                                          self.settings.text_color,  # 文字颜色
                                                          self.settings.score_color  # 文字背景颜色
@@ -199,4 +199,3 @@ class HighScore():
     def draw(self):
         self.screen.fill(self.settings.button_color, self.rect)
         self.screen.blit(self.msg_image, self.msg_rect)
-
