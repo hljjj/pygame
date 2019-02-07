@@ -74,6 +74,8 @@ def check_keydown(event, game_settings, screen, ship, bullets, aliens,stats):
             bullet_fire(game_settings, screen, ship, bullets)
         elif event.key == pygame.K_a:  # 设置一个让外星人生成的条件
             alien_built(game_settings, screen, aliens)
+        if event.key == pygame.K_q or pygame.K_ESCAPE:  # 捕捉退出键
+            sys.exit()
     else:
         if event.key == pygame.K_q or pygame.K_ESCAPE:  # 捕捉退出键
             sys.exit()
