@@ -21,10 +21,47 @@ def check_event(game_settings, screen, ship, bullets, aliens, stats, play_button
             check_mouse(mouse_x, mouse_y, stats, play_button, game_settings, ship)
 
 
+def check_keydown(event, game_settings, screen, ship, bullets, aliens, stats):
+    # check_out(event)  和其他键分开会导致在不启动游戏的情况下按键就退出,bug产生原因不明
+    if stats.game_activate is True:
+        check_ship_move(event, game_settings, screen, ship, bullets, aliens)
+
+
+def check_out(event):
+    if event.key == pygame.K_q or pygame.K_ESCAPE:  # 捕捉退出键
+        sys.exit()
+
+
+def check_ship_move(event, game_settings, screen, ship, bullets, aliens):
+    if event.key == pygame.K_RIGHT:  # 读取键入的属性,捕捉到右箭头
+        ship.moving_right = True
+    elif event.key == pygame.K_LEFT:  # 捕捉左键
+        ship.moving_left = True
+    elif event.key == pygame.K_SPACE:  # 捕捉空格键
+        bullet_fire(game_settings, screen, ship, bullets)
+    elif event.key == pygame.K_q or pygame.K_ESCAPE:
+        sys.exit()
+
+
 def bullet_fire(game_settings, screen, ship, bullets):
     if len(bullets) < game_settings.bullet_limit:  # 限制子弹数量
         new_bullet = Bullet(game_settings, screen, ship)  # 创建新子弹
         bullets.add(new_bullet)  # 把新子弹添加到编组
+
+
+def check_keyup(event, ship):
+    if event.key == pygame.K_RIGHT:
+        ship.moving_right = False
+    elif event.key == pygame.K_LEFT:
+        ship.moving_left = False
+
+
+def check_mouse(mouse_x, mouse_y, stats, play_button, game_settings, ship):
+    if play_button.rect.collidepoint(mouse_x, mouse_y):  # 点对面碰撞
+        stats.game_activate = True
+        game_settings.reset()
+        ship.rect.centerx = ship.screen_rect.centerx
+        pygame.init()
 
 
 def check_time(game_settings, screen, aliens, stats):  # 计算时间间隔作为计时器
@@ -41,22 +78,6 @@ def alien_built(game_settings, screen, aliens):
         aliens.add(new_alien)
 
 
-def ship_hit(game_settings, ship, bullets, aliens, stats, high_score):
-    '''alien到达了底部的时候的操作'''
-    sleep(3)  # 暂停,单位是s
-    game_settings.ship_limit -= 1  # 失去一艘船
-    bullets.empty()  # 清空子弹
-    aliens.empty()   # 清空外星人
-    ship.rect.centerx = ship.screen_rect.centerx  # 飞船重新居中
-    if game_settings.ship_limit <= 0:  # 飞船耗尽,游戏结束
-        score = stats.score
-        hs(score)   # 输出分数
-        high_score.update()   # 更新最高分
-        high_score.pre_msg()
-        stats.reset_stats()  # 重置分数,等级,标记
-        game_settings.reset()  # 重置游戏难度
-
-
 def check_ship_alien(game_settings, ship, bullets, aliens, stats, high_score):
     '''检测是否有alien到达了底部'''
     for alien in aliens.sprites():
@@ -64,36 +85,20 @@ def check_ship_alien(game_settings, ship, bullets, aliens, stats, high_score):
             ship_hit(game_settings, ship, bullets, aliens, stats, high_score)
 
 
-def check_keydown(event, game_settings, screen, ship, bullets, aliens,stats):
-    if stats.game_activate is True:
-        if event.key == pygame.K_RIGHT:  # 读取键入的属性,捕捉到右箭头
-            ship.moving_right = True
-        elif event.key == pygame.K_LEFT:  # 捕捉左键
-            ship.moving_left = True
-        elif event.key == pygame.K_SPACE:  # 捕捉空格键
-            bullet_fire(game_settings, screen, ship, bullets)
-        elif event.key == pygame.K_a:  # 设置一个让外星人生成的条件
-            alien_built(game_settings, screen, aliens)
-        if event.key == pygame.K_q or pygame.K_ESCAPE:  # 捕捉退出键
-            sys.exit()
-    else:
-        if event.key == pygame.K_q or pygame.K_ESCAPE:  # 捕捉退出键
-            sys.exit()
-
-
-def check_keyup(event, ship):
-    if event.key == pygame.K_RIGHT:
-        ship.moving_right = False
-    elif event.key == pygame.K_LEFT:
-        ship.moving_left = False
-
-
-def check_mouse(mouse_x, mouse_y, stats, play_button, game_settings, ship):
-    if play_button.rect.collidepoint(mouse_x, mouse_y):  # 点对面碰撞
-        stats.game_activate = True
-        game_settings.reset()
-        ship.rect.centerx = ship.screen_rect.centerx
-        pygame.init()
+def ship_hit(game_settings, ship, bullets, aliens, stats, high_score):
+    '''alien到达了底部的时候的操作'''
+    sleep(3)  # 暂停,单位是s
+    game_settings.ship_limit -= 1  # 失去一艘船
+    bullets.empty()  # 清空子弹
+    aliens.empty()  # 清空外星人
+    ship.rect.centerx = ship.screen_rect.centerx  # 飞船重新居中
+    if game_settings.ship_limit <= 0:  # 飞船耗尽,游戏结束
+        score = stats.score
+        hs(score)  # 输出分数
+        high_score.update()  # 更新最高分
+        high_score.pre_msg()
+        stats.reset_stats()  # 重置分数,等级,标记
+        game_settings.reset()  # 重置游戏难度
 
 
 def check_bullets(bullets, aliens, stats, score_board, game_settings):
@@ -117,6 +122,12 @@ def check_bullets(bullets, aliens, stats, score_board, game_settings):
             bullets.remove(bullet)
 
 
+def sound_bomb(game_settings):
+    '''播放爆炸音效'''
+    pygame.mixer.music.load(game_settings.collide_sound)
+    pygame.mixer.music.play()
+
+
 def update_aliens(aliens):
     aliens.update()  # 有触底检测,不需要删除过线alien
 
@@ -136,7 +147,3 @@ def update_screen(game_settings, screen, ship, actor, bullets, aliens, play_butt
     pygame.display.flip()   # 用新的屏幕取代旧屏幕,需要注意层级
 
 
-def sound_bomb(game_settings):
-    '''播放爆炸音效'''
-    pygame.mixer.music.load(game_settings.collide_sound)
-    pygame.mixer.music.play()

@@ -35,7 +35,7 @@ class Settings():
         self.score_width = 100
         self.score_height = 30
         self.score_color = (243, 244, 36)  # 暗黄色
-        self.score_font = pygame.font.SysFont(None, 20)  # 计分板字体设置
+        self.score_font = pygame.font.SysFont(None, 18)  # 计分板字体设置,可以用font.get_fonts()获取可用字体
         self.high_score_font = pygame.font.SysFont(None, 30)  # 最高分字体设置
         # 设置图片,声音路径
         self.ship_path = 'images/ship.bmp'

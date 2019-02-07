@@ -30,4 +30,4 @@ def run_game():
                          aliens, play_button, stats, score_board, high_score)  # 更新屏幕
 
 
-run_game()   # 运行游戏
+run_game()

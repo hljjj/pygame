@@ -176,6 +176,7 @@ class HighScore():
             for row in reader:  # 读取全部内容到列表
                 read_list.append(row)
         with open(path, 'a') as f:
+            writer = csv.writer(f)
             if not read_list:  # 第一次打开该文件,则列表为空,需要添加字段
                 data = [['high score', ], [0, ], ]  # csv写入必须是列表
                 for row in data:
